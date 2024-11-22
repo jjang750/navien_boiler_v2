@@ -1,0 +1,6 @@
+{
+  "name": "[KR] 경동 나비엔 보일러 V2",
+  "country": "KR",
+  "domains": ["sensor","climate"],  
+  "render_readme": true
+}

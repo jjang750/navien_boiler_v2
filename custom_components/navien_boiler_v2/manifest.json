@@ -1,0 +1,9 @@
+{
+ "domain":"navien_boiler_v2",
+ "name":"경동 나비엔 보일러 V2.0",
+ "version":"0.1.2",
+ "documentation":"",
+ "codeowners":["@jjang750"],
+ "requirements":[],
+ "iot_class":"cloud_polling"
+}
