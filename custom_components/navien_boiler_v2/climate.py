@@ -154,11 +154,12 @@ class SmartThingsApi:
         """Update function for updating api information."""
         try:
             SMARTTHINGS_API_URL = f'https://api.smartthings.com/v1/devices/{self.deviceId}/status'
+            _LOGGER.debug("SmartThingsApi.update : {}".format(SMARTTHINGS_API_URL))
 
             response = requests.get(SMARTTHINGS_API_URL, timeout=10, headers=self.headers)
+            _LOGGER.debug("SmartThingsApi.update status_code : {}".format(response.status_code))
 
             if response.status_code == 200:
-
                 response_json = response.json()
 
                 BOILER_STATUS['switch'] = response_json['components']['main']['switch']['switch']['value']
@@ -176,6 +177,7 @@ class SmartThingsApi:
 
                 self.result = BOILER_STATUS
 
+                _LOGGER.debug('JSON Response: type %s, %s', type(self.result), self.result)
                 print('JSON Response: type %s, %s', type(self.result), self.result)
 
             else:
