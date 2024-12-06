@@ -102,6 +102,8 @@ class SmartThingsApi:
                 _LOGGER.error("error send command : {}".format(response))
                 return False
 
+            self.update()
+
         except Exception as ex:
             _LOGGER.error('Failed to send Navien Boiler API Error: %s', ex)
             print(" Failed to send Navien Boiler API Error: {} ".format(ex))
@@ -174,6 +176,9 @@ class SmartThingsApi:
                 # 온수온도
                 BOILER_STATUS['thermostatWaterHeatingSetpoint'] = response_json['components']['main']['thermostatWaterHeatingSetpoint']['heatingSetpoint']['value']
                 BOILER_STATUS['waterHeatingSetpointRange'] = response_json['components']['main']['thermostatWaterHeatingSetpoint']['heatingSetpointRange']['value']
+                # 외출일때 난방온수 온도와 온수 온도를 같게 한다.
+                if BOILER_STATUS['mode'] == "away":
+                    BOILER_STATUS['thermostatHeatingSetpoint'] = response_json['components']['main']['thermostatWaterHeatingSetpoint']['heatingSetpoint']['value']
 
                 self.result = BOILER_STATUS
 
@@ -249,17 +254,31 @@ class Navien(ClimateEntity):
     @property
     def target_temperature_step(self):
         """Return the supported step of target temperature."""
+        if BOILER_STATUS['mode'] == "away":
+            return BOILER_STATUS['waterHeatingSetpointRange']['step']
         return BOILER_STATUS['heatingSetpointRange']['step']
 
     @property
     def target_temperature_low(self):
         """Return the minimum temperature."""
+        if BOILER_STATUS['mode'] == "away":
+            return BOILER_STATUS['waterHeatingSetpointRange']['minimum']
         return BOILER_STATUS['heatingSetpointRange']['minimum']
 
     @property
     def target_temperature_high(self):
         """Return the maximum temperature."""
+        if BOILER_STATUS['mode'] == "away":
+            return BOILER_STATUS['waterHeatingSetpointRange']['maximum']
         return BOILER_STATUS['heatingSetpointRange']['maximum']
+
+    @property
+    def target_temperature(self):
+        """Return the temperature we try to reach."""
+        if BOILER_STATUS['mode'] == "away":
+             int(BOILER_STATUS['thermostatWaterHeatingSetpoint'])
+        return int(BOILER_STATUS['thermostatHeatingSetpoint'])
+
 
     @property
     def is_on(self):
@@ -271,10 +290,6 @@ class Navien(ClimateEntity):
         """Return the current temperature."""
         return int(BOILER_STATUS['temperatureMeasurement'])
 
-    @property
-    def target_temperature(self):
-        """Return the temperature we try to reach."""
-        return int(BOILER_STATUS['thermostatHeatingSetpoint'])
 
     @property
     def hvac_mode(self):
@@ -319,11 +334,15 @@ class Navien(ClimateEntity):
     @property
     def min_temp(self):
         """Return the minimum temperature."""
+        if BOILER_STATUS['mode'] == "away":
+            return BOILER_STATUS['waterHeatingSetpointRange']['minimum']
         return BOILER_STATUS['heatingSetpointRange']['minimum']
 
     @property
     def max_temp(self):
         """Return the maximum temperature."""
+        if BOILER_STATUS['mode'] == "away":
+            return BOILER_STATUS['waterHeatingSetpointRange']['maximum']
         return BOILER_STATUS['heatingSetpointRange']['maximum']
 
     def set_preset_mode(self, preset_mode):
@@ -331,22 +350,16 @@ class Navien(ClimateEntity):
         """Set new preset mode."""
         if self.is_on is False:
             self.device.switch_on()
-            BOILER_STATUS['switch'] = 'on'
         if preset_mode == STATE_HEAT:
             self.device.heat()
-            BOILER_STATUS['mode'] = 'heat'
         elif preset_mode == STATE_ONDOL:
             self.device.ondol()
-            BOILER_STATUS['mode'] = 'ondol'
         elif preset_mode == STATE_AWAY:
             self.device.away()
-            BOILER_STATUS['mode'] = 'away'
         elif preset_mode == STATE_OFF:
             self.device.switch_off()
-            BOILER_STATUS['mode'] = 'OFF'
         else:
             _LOGGER.error("Unrecognized set_preset_mode: %s", preset_mode)
-
         self.update()
 
     def set_hvac_mode(self, hvac_mode):
@@ -354,11 +367,8 @@ class Navien(ClimateEntity):
         """Set new target hvac mode."""
         if hvac_mode == HVACMode.HEAT:
             self.device.switch_on()
-            BOILER_STATUS['switch'] = 'on'
-            BOILER_STATUS['mode'] = 'away'
         elif hvac_mode == HVACMode.OFF:
             self.device.switch_off()
-            BOILER_STATUS['mode'] = 'OFF'
 
         self.update()
 
@@ -374,14 +384,10 @@ class Navien(ClimateEntity):
             return None
 
         # 난방 모드에 따른 온도 변경
-        operation_mode = BOILER_STATUS['mode']
-        if operation_mode == 'away':
-            BOILER_STATUS['thermostatWaterHeatingSetpoint'] = temperature
+        if BOILER_STATUS['mode'] == 'away':
             self.device.setThermostatWaterHeatingSetpoint(temperature)
         else:
-            BOILER_STATUS['thermostatHeatingSetpoint'] = temperature
             self.device.setThermostatHeatingSetpoint(temperature)
-
         self.update()
 
     def turn_on(self):
@@ -400,7 +406,6 @@ class Navien(ClimateEntity):
             self.turn_off()
         else:
             self.turn_on()
-        self.update()
 
     def update(self):
         _LOGGER.debug(" updated!! ")
