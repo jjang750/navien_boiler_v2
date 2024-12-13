@@ -49,25 +49,22 @@ SmartThings 업데이트에 맞춰 V2.0으로 변경하고 하드코딩 된 부�
   - climate.py <- Climate
   - \_\_init__.py
 
-9) 파일 중 commands.json을 열어 token값과 deviceId값을 수정합니다.
-```
-  "token": "a81c7152-87a0-4f2f-877b-19f4b20XXXXX",
-  "deviceId": "c9fbd5c5-63ab-4e9c-9d7d-5c72b59XXXXX",
-```  
-  - "쌍타옴표로 표시 된 부분만 수정해야 합니다."
-
-
-10) homeassistant/configuration.yaml 에 climate 를 추가합니다.
+9) homeassistant/configuration.yaml 에 climate, sensor 를 추가 합니다.
+  이때 token, deviceId 값을 같이 추가해 줍니다.
 ```
 climate:
   - platform: navien_boiler
     scan_interval: 360
-
+    token: 'a81c7152-87a0-4f2f-877b-19f4b20XXXXX'
+    deviceId: 'c9fbd5c5-63ab-4e9c-9d7d-5c72b59XXXXX'
+  
 sensor:
   - platform: navien_boiler
     scan_interval: 360
+    token: 'a81c7152-87a0-4f2f-877b-19f4b20XXXXX'
+    deviceId: 'c9fbd5c5-63ab-4e9c-9d7d-5c72b59XXXXX'
 ```
-11) Home Assistant를 재시작 하면 적용됩니다.
+10) Home Assistant를 재시작 하면 적용됩니다.
 
 ※ 참고로 climate는 현재 온도만 실시간으로 적용되고, 상태는 초기 부팅 시 적용됩니다.
    SmartThings API를 사용하기 때문에 설정값 오류가 생겨 어쩔 수 없었습니다.

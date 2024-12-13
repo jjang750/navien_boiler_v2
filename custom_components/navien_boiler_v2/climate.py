@@ -46,12 +46,17 @@ BOILER_STATUS = {
 
 IS_BOOTED = False
 
+
 def setup_platform(hass, config, add_entities, discovery_info=None):
     global IS_BOOTED
     """Set up a Navien."""
     scriptpath = os.path.dirname(__file__)
     with open(scriptpath + "/commands.json", "r") as f:
         data = json.load(f)
+        _LOGGER.debug("start navien_boiler_v2 data {0}".format(data))
+
+    data['token'] = config.get('token')
+    data['deviceId'] = config.get('deviceId')
 
     device = SmartThingsApi(data)
     device.update()

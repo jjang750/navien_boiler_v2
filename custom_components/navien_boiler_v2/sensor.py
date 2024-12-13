@@ -21,6 +21,7 @@ BOILER_STATUS = {
 
 _LOGGER = logging.getLogger(__name__)
 
+
 def setup_platform(hass, config, add_entities, discovery_info=None):
     """example_integration sensor platform setup"""
     _LOGGER.info(" start navien boiler v2 ")
@@ -28,6 +29,9 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     scriptpath = os.path.dirname(__file__)
     with open(scriptpath + "/commands.json", "r") as f:
         data = json.load(f)
+
+    data['token'] = config.get('token')
+    data['deviceId'] = config.get('deviceId')
 
     _LOGGER.debug("start navien_boiler_v2 :{0} {1} {2} ".format(config, discovery_info, data))
 
@@ -71,8 +75,11 @@ class SmartThingsApi:
                 BOILER_STATUS['supportedThermostatModes'] = response_json['components']['main']['thermostatMode']['supportedThermostatModes']['value']
                 BOILER_STATUS['thermostatHeatingSetpoint'] = response_json['components']['main']['thermostatHeatingSetpoint']['heatingSetpoint']['value']
                 BOILER_STATUS['heatingSetpointRange'] = response_json['components']['main']['thermostatHeatingSetpoint']['heatingSetpointRange']['value']
-                # 온수온도
-                BOILER_STATUS['thermostatWaterHeatingSetpoint'] = response_json['components']['main']['thermostatWaterHeatingSetpoint']['heatingSetpoint']['value']
+                # 외출일때 난방온수 온도와 온수 온도를 같게 한다.
+                if BOILER_STATUS['mode'] == "away":
+                    BOILER_STATUS['thermostatHeatingSetpoint'] = response_json['components']['main']['thermostatWaterHeatingSetpoint']['heatingSetpoint']['value']
+                    BOILER_STATUS['heatingSetpointRange'] = response_json['components']['main']['thermostatWaterHeatingSetpoint']['heatingSetpointRange'][
+                        'value']
 
                 self.result = BOILER_STATUS
 
