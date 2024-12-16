@@ -31,7 +31,7 @@ STATE_AWAY = '외출'
 STATE_OFF = '종료'
 
 BOILER_STATUS = {
-    'deviceAlias': '경동 나비엔 보일러',
+    'deviceAlias': '경동 나비엔 보일러 v2',
     'Date': f"{datetime.datetime.now()}",
     "mode": "away",
     "supportedThermostatModes":[],
