@@ -69,8 +69,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
 class SmartThingsApi:
 
     def __init__(self, data):
-        """Initialize the SmartThings API.."""
-        self.api_url = 'https://api.smartthings.com/v1/devices/'
+        """Initialize the Air Korea API.."""
         self.result = {}
         self.data = data
         self.token = data['token']
@@ -96,7 +95,7 @@ class SmartThingsApi:
             print("command : " + command)
             _LOGGER.debug("command : " + command)
 
-            SMARTTHINGS_API_URL = f'{self.api_url}{self.deviceId}/commands'
+            SMARTTHINGS_API_URL = f'https://api.smartthings.com/v1/devices/{self.deviceId}/commands'
 
             response = requests.post(SMARTTHINGS_API_URL, timeout=10, headers=self.headers, data=command)
 
@@ -158,7 +157,7 @@ class SmartThingsApi:
     def update(self):
         """Update function for updating api information."""
         try:
-            SMARTTHINGS_API_URL = f'{self.api_url}{self.deviceId}/status'
+            SMARTTHINGS_API_URL = f'https://api.smartthings.com/v1/devices/{self.deviceId}/status'
             _LOGGER.debug("SmartThingsApi.update : {}".format(SMARTTHINGS_API_URL))
 
             response = requests.get(SMARTTHINGS_API_URL, timeout=10, headers=self.headers)
@@ -202,9 +201,9 @@ class Navien(ClimateEntity):
     def __init__(self, device, hass):
         """Initialize the thermostat."""
         self._hass = hass
-        self._name = '경동 나비엔 보일러 v2'
+        self._name = '경동 나비엔 보일러'
         self.device = device
-        self.node_id = 'navien_climate_v2'
+        self.node_id = 'navien_climate'
         self.result = {}
 
     @property
@@ -247,11 +246,6 @@ class Navien(ClimateEntity):
     def available(self):
         """Return True if entity is available."""
         return BOILER_STATUS['switch'] == 'on'
-
-    @property
-    def icon(self) -> str | None:
-        """Icon of the entity."""
-        return "mdi:fire-circle"
 
     @property
     def temperature_unit(self):
