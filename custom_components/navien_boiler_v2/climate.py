@@ -70,6 +70,7 @@ class SmartThingsApi:
 
     def __init__(self, data):
         """Initialize the Air Korea API.."""
+        self.api_url = 'https://api.smartthings.com/v1/devices/'
         self.result = {}
         self.data = data
         self.token = data['token']
@@ -95,7 +96,7 @@ class SmartThingsApi:
             print("command : " + command)
             _LOGGER.debug("command : " + command)
 
-            SMARTTHINGS_API_URL = f'https://api.smartthings.com/v1/devices/{self.deviceId}/commands'
+            SMARTTHINGS_API_URL = f'{self.api_url}{self.deviceId}/commands'
 
             response = requests.post(SMARTTHINGS_API_URL, timeout=10, headers=self.headers, data=command)
 
@@ -157,7 +158,7 @@ class SmartThingsApi:
     def update(self):
         """Update function for updating api information."""
         try:
-            SMARTTHINGS_API_URL = f'https://api.smartthings.com/v1/devices/{self.deviceId}/status'
+            SMARTTHINGS_API_URL = f'{self.api_url}{self.deviceId}/status'
             _LOGGER.debug("SmartThingsApi.update : {}".format(SMARTTHINGS_API_URL))
 
             response = requests.get(SMARTTHINGS_API_URL, timeout=10, headers=self.headers)
@@ -201,9 +202,9 @@ class Navien(ClimateEntity):
     def __init__(self, device, hass):
         """Initialize the thermostat."""
         self._hass = hass
-        self._name = '경동 나비엔 보일러'
+        self._name = '경동 나비엔 보일러 v2'
         self.device = device
-        self.node_id = 'navien_climate'
+        self.node_id = 'navien_climate_v2'
         self.result = {}
 
     @property
@@ -248,6 +249,11 @@ class Navien(ClimateEntity):
         return BOILER_STATUS['switch'] == 'on'
 
     @property
+    def icon(self) -> str | None:
+        """Icon of the entity."""
+        return "mdi:fire-circle"
+
+    @property
     def temperature_unit(self):
         """Return the unit of measurement which this thermostat uses."""
         return UnitOfTemperature.CELSIUS
@@ -256,16 +262,6 @@ class Navien(ClimateEntity):
     def target_temperature_step(self):
         """Return the supported step of target temperature."""
         return int(BOILER_STATUS['heatingSetpointRange']['step'])
-
-    @property
-    def target_temperature_low(self):
-        """Return the minimum temperature."""
-        return int(BOILER_STATUS['heatingSetpointRange']['minimum'])
-
-    @property
-    def target_temperature_high(self):
-        """Return the maximum temperature."""
-        return int(BOILER_STATUS['heatingSetpointRange']['maximum'])
 
     @property
     def target_temperature(self):
