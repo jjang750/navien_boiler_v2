@@ -264,6 +264,16 @@ class Navien(ClimateEntity):
         return int(BOILER_STATUS['heatingSetpointRange']['step'])
 
     @property
+    def target_temperature_low(self):
+        """Return the minimum temperature."""
+        return int(BOILER_STATUS['heatingSetpointRange']['minimum'])
+
+    @property
+    def target_temperature_high(self):
+        """Return the maximum temperature."""
+        return int(BOILER_STATUS['heatingSetpointRange']['maximum'])
+
+    @property
     def target_temperature(self):
         """Return the temperature we try to reach."""
         return int(BOILER_STATUS['thermostatHeatingSetpoint'])
